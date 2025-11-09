@@ -1,8 +1,22 @@
-/*
+.markdown-source-view.mod-cm6 .hzb-inline-btn {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .12s ease;
+  cursor: pointer;
+  font-size: 1em;
+  margin-left: 6px;
+  padding: 0 4px;
+  border-radius: 4px;
+  user-select: none;
+  color: #ababab;
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.markdown-source-view.mod-cm6 .cm-line:hover .hzb-inline-btn,
+.markdown-source-view.mod-cm6 .cm-activeLine .hzb-inline-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
 
-If your plugin does not need CSS, delete this file.
-
-*/
+.markdown-source-view.mod-cm6 .cm-line:not(.HyperMD-header) .hzb-inline-btn {
+  display: none;
+}
