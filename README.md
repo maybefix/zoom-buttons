@@ -1,6 +1,6 @@
 # Zoom Button
 
-This is a simple plugin for Obsidian (https://obsidian.md).
+This is a simple plugin for Obsidian.
 
 This plugin is used with [vslinko/obsidian-zoom](https://github.com/vslinko/obsidian-zoom) to add zoom buttons to the header section.
 
