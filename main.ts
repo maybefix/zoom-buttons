@@ -70,18 +70,16 @@ export default class HeadingZoomInlinePlugin extends Plugin {
     // @ts-expect-error
     view.editor.cm?.focus();
 
-    const ok =
-      (this.app as any).commands?.executeCommandById?.(ZOOM_CMD_ID) ??
-      (globalThis as any).app?.commands?.executeCommandById?.(ZOOM_CMD_ID) ??
-      false;
-
+    const ok = this.app.commands.executeCommandById(ZOOM_CMD_ID);
     if (!ok) {
       new Notice(`Failed to execute: ${ZOOM_CMD_ID}\nCheck that the Zoom plugin is enabled.`);
     }
   }
 }
 
-import type { Extension, EditorState } from "@codemirror/state";
+// types
+import type { Extension, EditorState, Transaction, Range } from "@codemirror/state";
+// values
 import { StateField } from "@codemirror/state";
 import {
   EditorView, Decoration, DecorationSet, ViewPlugin, ViewUpdate, WidgetType
@@ -116,15 +114,20 @@ class InlineBtn extends WidgetType {
     private onClick: (line0: number) => void
   ){ super(); }
 
-  toDOM(view: EditorView) {
+  toDOM(view: EditorView): HTMLElement {
     const el = document.createElement("span");
     el.className = "hzb-inline-btn";
     el.textContent = this.label || "Zoom";
     el.title = "Zoom into this heading";
-    el.addEventListener("mousedown", (e) => { e.preventDefault(); e.stopPropagation(); });
-    el.addEventListener("click", (e) => {
+    el.addEventListener("mousedown", (e: MouseEvent) => {
+      if (e.button !== 0) return; // 左クリックのみ
       e.preventDefault(); e.stopPropagation();
-      const pos = view.posAtDOM(el);
+    });
+    el.addEventListener("click", (e: MouseEvent) => {
+      if (e.button !== 0) return;
+      e.preventDefault(); e.stopPropagation();
+      const pos = view.posAtDOM(el, 1);
+      if (pos < 0) return;
       const line0 = view.state.doc.lineAt(pos).number - 1;
       this.onClick(line0);
     });
@@ -133,20 +136,21 @@ class InlineBtn extends WidgetType {
   ignoreEvent() { return false; }
 }
 
-function buildInlineDecos(state: any, label: string, onClick: (line: number) => void): DecorationSet {
+function buildInlineDecos(
+  state: EditorState,
+  label: string,
+  onClick: (line: number) => void
+): DecorationSet {
   const doc = state.doc;
   const targets = collectHeadingLinesFromState(state);
-  const widgets: any[] = [];
+  const widgets: Range<Decoration>[] = [];
 
   for (const ln of targets) {
     if (ln < 0 || ln >= doc.lines) continue;
-
     const lineInfo = doc.line(ln + 1);
     widgets.push(
-      Decoration.widget({
-        widget: new InlineBtn(label, onClick),
-        side: 1,
-      }).range(lineInfo.to)
+      Decoration.widget({ widget: new InlineBtn(label, onClick), side: 1 })
+        .range(lineInfo.to)
     );
   }
   return Decoration.set(widgets, true);
@@ -157,8 +161,8 @@ function createInlineHeadingButtons(opts: {
   onClick: (line0: number) => void;
 }): Extension[] {
   const field = StateField.define<DecorationSet>({
-    create: (st) => buildInlineDecos(st, opts.label, opts.onClick),
-    update: (decos, tr) => {
+    create: (st: EditorState) => buildInlineDecos(st, opts.label, opts.onClick),
+    update: (decos: DecorationSet, tr: Transaction) => {
       if (tr.docChanged || tr.selection) {
         return buildInlineDecos(tr.state, opts.label, opts.onClick);
       }
@@ -182,7 +186,7 @@ class HzSettingTab extends PluginSettingTab {
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
-    containerEl.createEl("h2", { text: "Heading Zoom Inline" });
+    new Setting(containerEl).setName("Zoom button").setHeading();
 
     new Setting(containerEl)
       .setName("Button label")
