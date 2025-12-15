@@ -20,7 +20,7 @@ export default class HeadingZoomInlinePlugin extends Plugin {
 
     this.addCommand({
       id: "hz-zoom-at-cursor",
-      name: "Zoom at current cursor (obsidian-zoom:zoom-in)",
+      name: "zoom at current cursor (obsidian-zoom:zoom-in)",
       callback: () => this.zoomAtCurrentCursor(),
     });
   }
