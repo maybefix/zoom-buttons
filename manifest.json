@@ -1,7 +1,7 @@
 {
   "id": "zoom-buttons",
   "name": "Zoom Buttons",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minAppVersion": "1.5.11",
   "description": "Adds a small button next to each heading in Live Preview to trigger the Zoom plugin on that heading.",
   "author": "MaybeFix",
